@@ -24,3 +24,9 @@ Our code is based on their [repository](https://github.com/owenzlz/DeepImageBlen
 
 ### Traditional method
 `python traiditional.py --preset=0`
+
+## Dataset
+We used [MSRA10K](https://mmcheng.net/msra10k/) and [MSRA-B](https://mmcheng.net/msra10k/), total 15K pairs of (object image, binary mask).
+
+## Pretrained model
+In `./pretrained`, we provide pretrained models for images of `./data`.

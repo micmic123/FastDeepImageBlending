@@ -36,7 +36,7 @@ parser.add_argument('--ss', type=int, default=300, help='source image size')
 parser.add_argument('--ts', type=int, default=512, help='target image size')
 parser.add_argument('--x', type=int, default=-1, help='vertical location 240')
 parser.add_argument('--y', type=int, default=-1, help='vertical location 256')
-parser.add_argument('--device', type=int, default=7, help='GPU ID')
+parser.add_argument('--device', type=int, default=0, help='GPU ID')
 args = parser.parse_args()
 now = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
 
