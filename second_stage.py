@@ -91,7 +91,7 @@ while run[0] <= num_steps:
         # Print Loss
         if run[0] % 1 == 0:
             print("run {}: ".format(run[0]), end='')
-            print(' style : {:4f}, content: {:4f}'.format(style_loss.item()))
+            print(' style : {:4f}'.format(style_loss.item()))
         if run[0] % 100 == 0:
             r = torch.clamp(first_pass_img.detach().cpu(), 0, 255)
             r = r.transpose(1, 3).transpose(1, 2).cpu().data.numpy()[0]

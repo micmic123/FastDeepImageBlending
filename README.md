@@ -27,7 +27,7 @@ Our code is based on their [repository](https://github.com/owenzlz/DeepImageBlen
 `python second_stage.py --target_file=./data/0_target.png --source_file=./my_first_stage_result.png`
 
 
-### Traditional method
+## Traditional method
 `python traiditional.py --preset=0`
 
 ## Dataset
