@@ -11,16 +11,21 @@ Our code is based on their [repository](https://github.com/owenzlz/DeepImageBlen
 
 ## Training
 ### Quick start
-`python3 train.py --trainset=path/to/trainset`
+`python3 train.py --trainset=path/to/trainset --target_file=./data/0_target.png`
 ### Setting hyperparameters
+`python train.py --grad_weight=1e3 --style_weight=1e2 --content_weight=1e0`
 `python train.py --grad_weight=1e3 --style_weight=1e2 --content_weight=1e0`
 ### Resuming
 `python train.py --grad_weight=1e3 --style_weight=1e2 --content_weight=1e0 --resume=./results/mydir/snapshots/mysnapshot.pt --optim=results/mydir/snapshots/mysnapshot_optim.pt`
 
 ## Test
-`python inference.py --device=0 --preset=0 --snapshot=./pretrained/data0_10.pt`
+`python inference.py --preset=0 --snapshot=./pretrained/data0_10.pt`
 
 `python inference.py --snapshot=./results/mydir/snapshots/mysnapshot.pt --source_file=data/0_source.png --mask_file=data/0_mask.png --target_file=data/0_target.png --x=240 --y=350`
+
+## Second stage
+`python second_stage.py --target_file=./data/0_target.png --source_file=./my_first_stage_result.png`
+
 
 ### Traditional method
 `python traiditional.py --preset=0`
