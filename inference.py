@@ -25,6 +25,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--source_file', type=str, default='data/1_source.png', help='path to the source image')
 parser.add_argument('--mask_file', type=str, default='data/1_mask.png', help='path to the source mask image')
 parser.add_argument('--target_file', type=str, default='data/6_target.png', help='path to the target image')
+parser.add_argument('--preset', type=int, default=None, help='preset for test [0, 5]')
 parser.add_argument('--snapshot', type=str, default='checkpoints/6_target_8.pt', help='path to the snapshot')
 parser.add_argument('--batchsize', type=int, default=1, help='')
 parser.add_argument('--worker_num', type=int, default=0, help='')
@@ -43,10 +44,13 @@ now = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
 ########### First Pass ###########
 ###################################
 
-basedir = '/'.join(args.snapshot.split('/')[:-2])
+if 'pretrained' not in args.snapshot:
+    basedir = '/'.join(args.snapshot.split('/')[:-2])
+else:
+    basedir ='.'
 example_dir = os.path.join(basedir, 'examples')
 os.makedirs(example_dir, exist_ok=True)
-epoch = int(os.path.basename(args.snapshot).split('_')[2])
+
 
 # Inputs
 target_file = args.target_file
@@ -57,6 +61,28 @@ mask_file = args.mask_file
 gpu_id = args.device
 ss = args.ss  # source image size
 ts = args.ts  # target image size
+
+# Location
+x_start = np.random.randint((ss+1)//2, ts-((ss+1)//2))
+y_start = np.random.randint((ss+1)//2, ts-((ss+1)//2))
+if (ss+1)//2 <= args.x <= ts-((ss+1)//2) and (ss+1)//2 <= args.y <= ts-((ss+1)//2):
+    x_start = args.x
+    y_start = args.y
+
+# Preset
+presets = {
+    0: (240, 350),
+    1: (200, 235),
+    4: (340, 320),
+    5: (150, 255),
+}
+if args.preset is not None:
+    assert 0 <= args.preset <= 5
+    target_file = f'data/{args.preset}_target.png'
+    source_file = f'data/{args.preset}_source.png'
+    mask_file = f'data/{args.preset}_mask.png'
+    x_start, y_start = presets[args.preset]
+
 
 # Model
 transfer = Transfer(args).to(gpu_id)
@@ -87,11 +113,6 @@ target_features_style = vgg(mean_shift(target_img))
 target_gram_style = [gram_matrix(y) for y in target_features_style]
 
 x = source_img
-x_start = np.random.randint((ss+1)//2, ts-((ss+1)//2))
-y_start = np.random.randint((ss+1)//2, ts-((ss+1)//2))
-if (ss+1)//2 <= args.x <= ts-((ss+1)//2) and (ss+1)//2 <= args.y <= ts-((ss+1)//2):
-    x_start = args.x
-    y_start = args.y
 
 # Make Canvas Mask
 canvas_mask = make_canvas_mask(x_start, y_start, target_img, mask)  # (B, ts, ts)
@@ -153,8 +174,13 @@ blend_img.data.clamp_(0, 255)
 input_img = input_img.detach()
 input_img.data.clamp_(0, 255)
 out = torch.cat([x_ts, x_ts*canvas_mask, blend_img, input_img], dim=0)
-filename = f'{now}_{epoch:02}_{grad_loss.item():.4f}_{style_loss.item():.4f}_' \
-           f'{content_loss.item():.4f}_{x_start}-{y_start}'
+if 'pretrained' not in args.snapshot:
+    epoch = int(os.path.basename(args.snapshot).split('_')[2])
+    filename = f'{now}_{epoch:02}_{grad_loss.item():.4f}_{style_loss.item():.4f}_' \
+               f'{content_loss.item():.4f}_{x_start}-{y_start}'
+else:
+    filename = f'{now}_{os.path.basename(target_file).split("_")[0]}_{grad_loss.item():.4f}_{style_loss.item():.4f}_' \
+               f'{content_loss.item():.4f}_{x_start}-{y_start}'
 save_grid(out, os.path.join(example_dir, filename + '.png'), nrow=args.batchsize)
 save_img(blend_img, os.path.join(example_dir, filename + '_result.png'))
 style_name = os.path.basename(target_file).split('.')[0]
